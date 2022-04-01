@@ -156,6 +156,41 @@ resource "aws_instance" "devops106_terraform_emile_webserver_tf" {
   tags = {
     Name = "devops106_terraform_emile_webserver"
   }
+
+  connection {
+    type = "ssh"
+    user = "ubuntu"
+    host = self.public_ip
+    private_key = file("/home/vagrant/.ssh/devops106_ethompson.pem")
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt-get remove docker -y docker-engine docker.io containerd runc",
+      "sudo apt-get update",
+      "sudo apt-get install -y ca-certificates curl gnupg lsb-release",
+      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg",
+      "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+      "sudo apt-get update",
+      "sudo apt-get install -y docker-ce docker-ce-cli containerd.io",
+      "sudo usermod -a -G docker ubuntu",
+
+
+
+
+    ]
+
+  }
+  provisioner "remote-exec" {
+    inline = [
+    "docker run -d hello-world",
+    "docker pull edspt/spartan_mongo:latest"
+
+
+    ]
+  }
+
+
 }
 #######################################MONGODB INSTANCE###########################################################
 resource "aws_instance" "devops106_terraform_emile_mongodb_tf" {
@@ -170,7 +205,36 @@ resource "aws_instance" "devops106_terraform_emile_mongodb_tf" {
   tags = {
     Name = "devops106_terraform_emile_mongodb"
   }
+
+  connection {
+    type = "ssh"
+    user = "ubuntu"
+    host = self.public_ip
+    private_key = file("/home/vagrant/.ssh/devops106_ethompson.pem")
+  }
+
+  provisioner "remote-exec"  {
+
+    inline = [
+      "curl -fsSL https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -",
+      "echo \"deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse\" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list",
+      "sudo apt update",
+      "sudo apt install mongodb-org -y",
+      "sudo systemctl start mongod.service",
+      "sudo systemctl enable mongod"
+
+    ]
+  }
+
+  provisioner "remote-exec" {
+
+    inline = [
+      "sudo sed -i 's/bindIp: 127.0.0.1/bindIp: 0.0.0.0/' /etc/mongod.conf"
+    ]
+  }
 }
+
+
 
 resource "aws_security_group" "devops106_terraform_emile_sg_mongodb_tf" {
   name = "devops106_terraform_emile_sg_mongodb"
