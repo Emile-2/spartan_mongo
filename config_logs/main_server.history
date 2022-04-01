@@ -1,0 +1,15 @@
+    1  sudo apt-get remove docker docker-engine docker.io containerd runc
+    2  sudo apt-get update
+    3  sudo apt-get install     ca-certificates     curl     gnupg     lsb-release
+    4  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    5  echo   "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+    6    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    7  sudo apt-get update
+    8  sudo apt-get install docker-ce docker-ce-cli containerd.io
+    9  sudo docker run hello-world
+   10  sudo usermod -a -G docker $USER
+   11  exit
+   12  docker pull edspt/spartan_mongo:latest
+   13  nano database.config
+   14  docker run -v /home/ubuntu/database.config:/database.config -v /home/ubuntu/log:/log -p 8080:8080 edspt/spartan_mongo:latest
+   32  history
