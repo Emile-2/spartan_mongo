@@ -1,10 +1,11 @@
 provider "aws" {
-  region = "eu-west-1"
-
+  region = var.region_var
 }
 
 resource "aws_vpc" "devops106_terraform_emile_vpc_tf" {
   cidr_block = "10.205.0.0/16"
+  enable_dns_support = true
+  enable_dns_hostnames = true
 
   tags = {
     Name = "devops106_terraform_emile_vpc"
@@ -12,7 +13,7 @@ resource "aws_vpc" "devops106_terraform_emile_vpc_tf" {
 }
 
 resource "aws_subnet" "devops106_terraform_emile_subnet_webserver_tf" {
-  vpc_id = aws_vpc.devops106_terraform_emile_vpc_tf.id
+  vpc_id = local.vpc_id_var
   cidr_block = "10.205.1.0/24"
 
   tags = {
@@ -21,7 +22,7 @@ resource "aws_subnet" "devops106_terraform_emile_subnet_webserver_tf" {
 }
 
 resource "aws_internet_gateway" "devops106_terraform_emile_igw_tf" {
-  vpc_id = aws_vpc.devops106_terraform_emile_vpc_tf.id
+  vpc_id = local.vpc_id_var
 
   tags = {
     Name = "devops106_terraform_emile_igw"
@@ -29,7 +30,7 @@ resource "aws_internet_gateway" "devops106_terraform_emile_igw_tf" {
 }
 
 resource "aws_route_table" "devops106_terraform_emile_rt_public_tf" {
-  vpc_id = aws_vpc.devops106_terraform_emile_vpc_tf.id
+  vpc_id = local.vpc_id_var
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -47,7 +48,7 @@ resource "aws_route_table_association" "devops106_terraform_emile_rt_assoc_publi
 }
 
 resource "aws_network_acl" "devops106_terraform_emile_nacl_public_tf" {
-  vpc_id = aws_vpc.devops106_terraform_emile_vpc_tf.id
+  vpc_id = local.vpc_id_var
 
   ingress {
     rule_no    = 100
@@ -114,7 +115,7 @@ resource "aws_network_acl" "devops106_terraform_emile_nacl_public_tf" {
 
 resource "aws_security_group" "devops106_terraform_emile_sg_webserver_tf" {
   name = "devops106_terraform_emile_sg_webserver"
-  vpc_id = aws_vpc.devops106_terraform_emile_vpc_tf.id
+  vpc_id = local.vpc_id_var
 
   ingress {
     from_port = 22
@@ -145,100 +146,107 @@ resource "aws_security_group" "devops106_terraform_emile_sg_webserver_tf" {
 
 
 resource "aws_instance" "devops106_terraform_emile_webserver_tf" {
-  ami = "ami-08ca3fed11864d6bb"
-  instance_type = "t2.micro"
+  ami = var.ubuntu_20_04_ami_id_var
+  instance_type = var.instance_type_t2_micro_var
   key_name = "devops106_ethompson"
   vpc_security_group_ids = [aws_security_group.devops106_terraform_emile_sg_webserver_tf.id]
 
   subnet_id = aws_subnet.devops106_terraform_emile_subnet_webserver_tf.id
 
   associate_public_ip_address = true
+
+  count = 4
+  user_data = data.template_file.app_init.rendered
+
   tags = {
-    Name = "devops106_terraform_emile_webserver"
+    Name = "devops106_terraform_emile_webserver_${count.index}"
   }
 
   connection {
     type = "ssh"
     user = "ubuntu"
     host = self.public_ip
-    private_key = file("/home/vagrant/.ssh/devops106_ethompson.pem")
+    private_key = file(var.private_key_file_path_var)
+  }
+  /*
+  provisioner "file" {
+    source = "../init_scripts/docker-install.sh"
+    destination = "/home/ubuntu/docker-install.sh"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "sudo apt-get remove docker -y docker-engine docker.io containerd runc",
-      "sudo apt-get update",
-      "sudo apt-get install -y ca-certificates curl gnupg lsb-release",
-      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg",
-      "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
-      "sudo apt-get update",
-      "sudo apt-get install -y docker-ce docker-ce-cli containerd.io",
-      "sudo usermod -a -G docker ubuntu",
-
-
-
-
+      "bash /home/ubuntu/docker-install.sh"
     ]
 
   }
+  */
+
+
+  provisioner "local-exec" {
+    command = "echo mongodb://${aws_instance.devops106_terraform_emile_mongodb_tf.public_ip}:27017 > ../database.config"
+  }
+
+  provisioner "file" {
+    source = "../database.config"
+    destination = "/home/ubuntu/database.config"
+  }
+
+  provisioner "file" {
+    source = "../init_scripts/docker-run-spartan.sh"
+    destination = "/home/ubuntu/docker-run-spartan.sh"
+  }
+
   provisioner "remote-exec" {
     inline = [
-    "docker run -d hello-world",
-    "docker pull edspt/spartan_mongo:latest"
-
+      "bash /home/ubuntu/docker-run-spartan.sh"
 
     ]
   }
 
 
 }
+data "template_file" "app_init" {
+  template = file("../init_scripts/docker-install.sh")
+}
+
 #######################################MONGODB INSTANCE###########################################################
 resource "aws_instance" "devops106_terraform_emile_mongodb_tf" {
-  ami = "ami-08ca3fed11864d6bb"
-  instance_type = "t2.micro"
-  key_name = "devops106_ethompson"
+  ami                    = var.ubuntu_20_04_ami_id_var
+  instance_type          = var.instance_type_t2_micro_var
+  key_name               = var.public_key_name_var
   vpc_security_group_ids = [aws_security_group.devops106_terraform_emile_sg_mongodb_tf.id]
 
   subnet_id = aws_subnet.devops106_terraform_emile_subnet_mongodb_tf.id
 
   associate_public_ip_address = true
-  tags = {
+  tags                        = {
     Name = "devops106_terraform_emile_mongodb"
   }
 
   connection {
-    type = "ssh"
-    user = "ubuntu"
-    host = self.public_ip
-    private_key = file("/home/vagrant/.ssh/devops106_ethompson.pem")
+    type        = "ssh"
+    user        = "ubuntu"
+    host        = self.public_ip
+    private_key = file(var.private_key_file_path_var)
   }
 
-  provisioner "remote-exec"  {
-
-    inline = [
-      "curl -fsSL https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -",
-      "echo \"deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse\" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list",
-      "sudo apt update",
-      "sudo apt install mongodb-org -y",
-      "sudo systemctl start mongod.service",
-      "sudo systemctl enable mongod"
-
-    ]
+  provisioner "file" {
+    source      = "../init_scripts/mongodb-install.sh"
+    destination = "/home/ubuntu/mongodb-install.sh"
   }
 
   provisioner "remote-exec" {
 
     inline = [
-      "sudo sed -i 's/bindIp: 127.0.0.1/bindIp: 0.0.0.0/' /etc/mongod.conf"
+      "bash /home/ubuntu/mongodb-install.sh"
     ]
   }
 }
 
-
-
 resource "aws_security_group" "devops106_terraform_emile_sg_mongodb_tf" {
   name = "devops106_terraform_emile_sg_mongodb"
-  vpc_id = aws_vpc.devops106_terraform_emile_vpc_tf.id
+  vpc_id = local.vpc_id_var
 
   ingress {
     from_port = 22
@@ -267,7 +275,7 @@ resource "aws_security_group" "devops106_terraform_emile_sg_mongodb_tf" {
 
 }
 resource "aws_subnet" "devops106_terraform_emile_subnet_mongodb_tf" {
-  vpc_id = aws_vpc.devops106_terraform_emile_vpc_tf.id
+  vpc_id = local.vpc_id_var
   cidr_block = "10.205.2.0/24"
 
   tags = {
@@ -282,7 +290,7 @@ resource "aws_route_table_association" "devops106_terraform_emile_rt_assoc_publi
 }
 
 resource "aws_network_acl" "devops106_terraform_emile_nacl_mongodb_public_tf" {
-  vpc_id = aws_vpc.devops106_terraform_emile_vpc_tf.id
+  vpc_id = local.vpc_id_var
 
   ingress {
     rule_no    = 100
