@@ -1,13 +1,21 @@
 import json
 import datetime
+import time
+
 from spartan import Spartan
 from pymongo import MongoClient
 
-with open("database.config") as config_file:
-    database_url = config_file.read().strip()
-
-client = MongoClient(database_url)
-db = client.spartan_test
+# with open("database.config") as config_file:
+#     database_url = config_file.read().strip()
+while True:
+    try:
+        client = MongoClient("mongodb://db_emile.emile.devops106:27017")
+        break
+    except Exception as e:
+        print("trying to create a connection to the database")
+        time.sleep(2)
+# client = MongoClient(database_url)
+# db = client.spartan_test
 
 def log(action):
     try:

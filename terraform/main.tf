@@ -155,7 +155,7 @@ resource "aws_instance" "devops106_terraform_emile_webserver_tf" {
 
   associate_public_ip_address = true
 
-  count = 4
+  count = 2
   user_data = data.template_file.app_init.rendered
 
   tags = {
@@ -183,26 +183,26 @@ resource "aws_instance" "devops106_terraform_emile_webserver_tf" {
   */
 
 
-  provisioner "local-exec" {
-    command = "echo mongodb://${aws_instance.devops106_terraform_emile_mongodb_tf.public_ip}:27017 > ../database.config"
-  }
-
-  provisioner "file" {
-    source = "../database.config"
-    destination = "/home/ubuntu/database.config"
-  }
-
-  provisioner "file" {
-    source = "../init_scripts/docker-run-spartan.sh"
-    destination = "/home/ubuntu/docker-run-spartan.sh"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "bash /home/ubuntu/docker-run-spartan.sh"
-
-    ]
-  }
+#  provisioner "local-exec" {
+#    command = "echo mongodb://${aws_instance.devops106_terraform_emile_mongodb_tf.public_ip}:27017 > ../database.config"
+#  }
+#
+#  provisioner "file" {
+#    source = "../database.config"
+#    destination = "/home/ubuntu/database.config"
+#  }
+#
+#  provisioner "file" {
+#    source = "../init_scripts/docker-run-spartan.sh"
+#    destination = "/home/ubuntu/docker-run-spartan.sh"
+#  }
+#
+#  provisioner "remote-exec" {
+#    inline = [
+#      "bash /home/ubuntu/docker-run-spartan.sh"
+#
+#    ]
+#  }
 
 
 }
@@ -220,6 +220,9 @@ resource "aws_instance" "devops106_terraform_emile_mongodb_tf" {
   subnet_id = aws_subnet.devops106_terraform_emile_subnet_mongodb_tf.id
 
   associate_public_ip_address = true
+
+  user_data = data.template_file.db_init.rendered
+
   tags                        = {
     Name = "devops106_terraform_emile_mongodb"
   }
@@ -231,17 +234,20 @@ resource "aws_instance" "devops106_terraform_emile_mongodb_tf" {
     private_key = file(var.private_key_file_path_var)
   }
 
-  provisioner "file" {
-    source      = "../init_scripts/mongodb-install.sh"
-    destination = "/home/ubuntu/mongodb-install.sh"
-  }
-
-  provisioner "remote-exec" {
-
-    inline = [
-      "bash /home/ubuntu/mongodb-install.sh"
-    ]
-  }
+#  provisioner "file" {
+#    source      = "../init_scripts/mongodb-install.sh"
+#    destination = "/home/ubuntu/mongodb-install.sh"
+#  }
+#
+#  provisioner "remote-exec" {
+#
+#    inline = [
+#      "bash /home/ubuntu/mongodb-install.sh"
+#    ]
+#  }
+}
+data "template_file" "db_init" {
+  template = file("../init_scripts/mongodb-install.sh")
 }
 
 resource "aws_security_group" "devops106_terraform_emile_sg_mongodb_tf" {
@@ -353,4 +359,18 @@ resource "aws_network_acl" "devops106_terraform_emile_nacl_mongodb_public_tf" {
   tags = {
     Name = "devops106_terraform_emile_nacl_mongodb_public"
   }
+}
+resource "aws_route53_zone" "devops106_terraform_emile_dns_zone" {
+  name = "emile.devops106"
+
+  vpc {
+    vpc_id = local.vpc_id_var
+  }
+}
+resource "aws_route53_record" "devops106_terraform_emile_dns_db_tf" {
+  name    = "db_emile"
+  type    = "A"
+  zone_id = aws_route53_zone.devops106_terraform_emile_dns_zone.zone_id
+  ttl = "30"
+  records = [aws_instance.devops106_terraform_emile_mongodb_tf.public_ip]
 }

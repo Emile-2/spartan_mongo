@@ -1,12 +1,22 @@
+import time
+
 from flask import Flask, request, jsonify
 import json
 import management
 from pymongo import MongoClient
 
-with open("database.config") as config_file:
-    database_url = config_file.read().strip()
+# with open("database.config") as config_file:
+#     database_url = config_file.read().strip()
+#
+#
+# while True:
+#     try:
+#         client = MongoClient("mongodb://db_emile.emile.devops106:27017")
+#         break
+#     except Exception as e:
+#         print("trying to create a connection to the database")
+#         time.sleep(2)
 
-client = MongoClient(database_url)
 
 flask_object = Flask(__name__)  # telling py i want to create a new server
 

@@ -8,3 +8,7 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docke
 sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 sudo usermod -a -G docker ubuntu
+
+sudo docker run -d hello-world
+sudo docker pull edspt/spartan_mongo:latest
+sudo docker run -d -v /home/ubuntu/log:/log -p 8080:8080 edspt/spartan_mongo:latest
