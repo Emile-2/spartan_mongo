@@ -14,8 +14,8 @@ while True:
     except Exception as e:
         print("trying to create a connection to the database")
         time.sleep(2)
-# client = MongoClient(database_url)
-# db = client.spartan_test
+
+db = client.spartan_test
 
 def log(action):
     try:
