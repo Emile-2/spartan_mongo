@@ -3,6 +3,7 @@ pipeline {
 
   environment {
     IMAGE_NAME = "edspt/spartan_mongo:V1." + "$BUILD_NUMBER"
+    DOCKER_CREDENTIALS = 'docker_hub_cred'
   }
 
   stages {
@@ -24,7 +25,7 @@ pipeline {
     stage('Push to dockerhub'){
       steps {
         script {
-          docker.withRegistry('','docker_hub_cred'){
+          docker.withRegistry('',DOCKER_CREDENTIALS){
             DOCKER_IMAGE.push()
           }
         }
