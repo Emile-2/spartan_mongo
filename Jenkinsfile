@@ -28,12 +28,18 @@ pipeline {
       }
     }
 
-    stage('Testing the Code'){
+    stage('Testing the Code') {
       steps{
         script {
           sh '''
-            docker run $IMAGE_NAME pytest
+            docker run --rm -v $PWD/test-results:/reports --workdir /app $IMAGE_NAME pytest -v --junitxml=/reports/results.xml
           '''
+          }
+        }
+
+        post {
+          always {
+            junit testResults: '**/test-results/*.xml'
           }
         }
       }

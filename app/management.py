@@ -9,7 +9,7 @@ from pymongo import MongoClient
 #     database_url = config_file.read().strip()
 while True:
     try:
-        client = MongoClient("mongodb://db_emile.emile.devops106:27017")
+        client = MongoClient("/database.config")
         break
     except Exception as e:
         print("trying to create a connection to the database")
