@@ -6,6 +6,7 @@ pipeline {
     DOCKER_CREDENTIALS = 'docker_hub_cred'
   }
 
+
   stages {
     stage('Cloning the project from GitHub'){
       steps {
