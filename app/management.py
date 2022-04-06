@@ -5,11 +5,12 @@ import time
 from spartan import Spartan
 from pymongo import MongoClient
 
-# with open("database.config") as config_file:
-#     database_url = config_file.read().strip()
+with open("/database.config") as config_file:
+    database_url = config_file.read().strip()
+
 while True:
     try:
-        client = MongoClient("/database.config")
+        client = MongoClient(database_url)
         break
     except Exception as e:
         print("trying to create a connection to the database")
