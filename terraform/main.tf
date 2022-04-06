@@ -155,7 +155,7 @@ resource "aws_instance" "devops106_terraform_emile_webserver_tf" {
 
   associate_public_ip_address = true
 
-  count = 2
+  count = 3
   user_data = data.template_file.app_init.rendered
 
   tags = {

@@ -9,13 +9,13 @@ from pymongo import MongoClient
 #     database_url = config_file.read().strip()
 #
 #
-while True:
-    try:
-        client = MongoClient("mongodb://db_emile.emile.devops106:27017")
-        break
-    except Exception as e:
-        print("trying to create a connection to the database")
-        time.sleep(2)
+# while True:
+#     try:
+#         client = MongoClient("mongodb://db_emile.emile.devops106:27017")
+#         break
+#     except Exception as e:
+#         print("trying to create a connection to the database")
+#         time.sleep(2)
 
 
 flask_object = Flask(__name__)  # telling py i want to create a new server
@@ -64,4 +64,4 @@ def list_all():
 if __name__ == "__main__":
 
 
-    flask_object.run(port=8080, host ="0.0.0.0")  # dont use debug true when pushing to server
+    flask_object.run(host = "0.0.0.0", port=8080)  # dont use debug true when pushing to server

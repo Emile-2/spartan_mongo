@@ -176,7 +176,7 @@ def list_spartans():
     for document in documents:
         document['_id'] = str(document['_id'])
         response_list.append(document)
-    return json.dumps(response_list)
+    return response_list
 
     # if db.employees.find_one() == None:
     #     return "Error, No data found"
