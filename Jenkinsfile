@@ -10,9 +10,19 @@ pipeline {
     }
 
     stage('Build Docker image') {
-    steps {
-      script {
-        docker.build 'edspt/spartan_mongo:latest'
+      steps {
+        script {
+          DOCKER_IMAGE = docker.build 'edspt/spartan_mongo:latest'
+        }
+      }
+    }
+
+    stage('Push to dockerhub'){
+      steps {
+        script {
+          docker.withRegistry('','docker_hub_cred'){
+            DOCKER_IMAGE.push()
+          }
         }
       }
     }
