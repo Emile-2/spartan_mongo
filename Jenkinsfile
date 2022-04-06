@@ -53,7 +53,7 @@ pipeline {
     stage('Push to Docker Hub') {
       steps {
         script {
-          docker.withRegistry('','DOCKER_CREDENTIALS') {
+          docker.withRegistry('',DOCKER_CREDENTIALS) {
             DOCKER_IMAGE.push()
           }
         }
