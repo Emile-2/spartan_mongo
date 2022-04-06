@@ -10,7 +10,7 @@ pipeline {
 
   environment {
   IMAGE_NAME = "edspt/spartan_mongo:V1.9" + "$BUILD_NUMBER"
-  DOCKER_CREDENTIALS = 'docker_hub_cred'
+  DOCKER_CREDENTIALS = 'docker_cred'
 
   }
 
