@@ -1,0 +1,29 @@
+    3  nano /etc/nginx/sites-available/default
+    4  sudo mv /etc/nginx/sites-available/default .
+   10  sudo nano /etc/nginx/sites-available/spartan_api
+   11  cat /etc/nginx/sites-available/spartan_api
+   12  sudo ln -s /etc/nginx/sites-available/spartan_api /etc/nginx/sites-enabled/
+   13  sudo systemctl restart nginx.service
+   14  sudo systemctl restart nginx
+   15  sudo systemctl status nginx
+   16  sudo nano /etc/nginx/sites-available/spartan_api
+   17  sudo systemctl restart nginx
+   18  sudo nano /etc/nginx/sites-available/spartan_api
+   19  sudo systemctl restart nginx
+   20  cat /etc/nginx/sites-enabled/spartan_api
+   21  sudo ln -s /etc/nginx/sites-available/spartan_api /etc/nginx/sites-enabled/spartan_api
+   22  sudo systemctl restart nginx
+   23  ls -la /etc/nginx/sites-enabled/
+   24  sudo rm /etc/nginx/sites-enabled/default
+   25  sudo systemctl restart nginx
+   26* sudo nano /etc/
+   27  sudo systemctl restart nginx
+   28  sudo nano /etc/nginx/sites-available/spartan_api
+   29  sudo systemctl restart nginx
+   30  sudo nano /etc/nginx/sites-available/spartan_api
+   31  sudo systemctl restart nginx
+   32  sudo nano /etc/nginx/sites-available/spartan_api
+   33  sudo systemctl restart nginxcat
+   34  sudo nano /etc/nginx/sites-available/spartan_api
+   35  sudo systemctl restart nginx
+   36  history

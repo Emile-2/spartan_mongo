@@ -5,7 +5,10 @@ import time
 from spartan import Spartan
 from pymongo import MongoClient
 
-with open("/database.config") as config_file:
+# with open("/database.config") as config_file: use the / for jenkins
+#     database_url = config_file.read().strip()
+
+with open("database.config") as config_file:
     database_url = config_file.read().strip()
 
 while True:

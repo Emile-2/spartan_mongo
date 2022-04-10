@@ -1,9 +1,11 @@
 import time
-
+import random
 from flask import Flask, request, jsonify
 import json
 import management
 from pymongo import MongoClient
+
+server_id = random.randint(1000, 9999)
 
 # with open("database.config") as config_file:
 #     database_url = config_file.read().strip()
@@ -23,13 +25,14 @@ flask_object = Flask(__name__)  # telling py i want to create a new server
 @flask_object.route('/', methods=["GET"])  # when user asks for nothing (/), run this method
 def home_page():
     management.log("User Accessed Homepage")
-    return """
-    Welcome to Emile's Server
-    Use the following API's to navigate
-    After http://127.0.0.1:5000/
-    Remove Spartan from records: /spartan/remove?id=sparta_id
-    Add Spartan to records: /spartan_add
-    View specific Spartan record by ID: /spartan/'enter spartan id here'   
+    return f"""
+    \tfrom server: {server_id}
+    \tWelcome to Emile's Server\n
+    \tUse the following API's to navigate\n
+    \tAfter http://127.0.0.1:5000/\n
+    \tRemove Spartan from records: /spartan/remove?id=sparta_id\n
+    \tAdd Spartan to records: /spartan_add\n
+    \tView specific Spartan record by ID: /spartan/'enter spartan id here'\n   
     """
 
 
@@ -64,4 +67,4 @@ def list_all():
 if __name__ == "__main__":
 
 
-    flask_object.run(host = "0.0.0.0", port=8080)  # dont use debug true when pushing to server
+    flask_object.run( port=8080)  # dont use debug true when pushing to server

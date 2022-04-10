@@ -21,3 +21,11 @@ variable "region_var" {
 locals {
   vpc_id_var = aws_vpc.devops106_terraform_emile_vpc_tf.id
 }
+
+locals {
+  vars = {
+    public_ip_address = aws_instance.devops106_terraform_emile_webserver_tf[*]
+  }
+}
+
+
