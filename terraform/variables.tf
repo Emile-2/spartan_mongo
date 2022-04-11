@@ -6,6 +6,10 @@ variable "ubuntu_20_04_ami_id_var" {
   default = "ami-08ca3fed11864d6bb"
 }
 
+variable "docker_spartan_ami" {
+  default = "ami-0a6936474da4942f9"
+}
+
 variable "instance_type_t2_micro_var" {
   default = "t2.micro"
 }

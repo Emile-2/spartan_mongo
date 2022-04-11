@@ -259,19 +259,20 @@ resource "aws_instance" "devops106_terraform_emile_proxy_tf" {
 
 data "template_file" "proxy_init" {
   template = file("../init_scripts/proxy-install.sh")
-
-  vars = {
-    "SERVER1" = aws_instance.devops106_terraform_emile_webserver_tf[0].public_ip
-    "SERVER2" = aws_instance.devops106_terraform_emile_webserver_tf[1].public_ip
-    "SERVER3" = aws_instance.devops106_terraform_emile_webserver_tf[2].public_ip
-
-  }
+/*
+#  vars = {
+#    "SERVER1" = aws_instance.devops106_terraform_emile_webserver_tf[0].private_ip
+#    "SERVER2" = aws_instance.devops106_terraform_emile_webserver_tf[1].private_ip
+#    "SERVER3" = aws_instance.devops106_terraform_emile_webserver_tf[2].private_ip
+#
+#  }
+  */
 }
 
 #################################WEBSERVER INSTANCE#################################################################
 
 resource "aws_instance" "devops106_terraform_emile_webserver_tf" {
-  ami = var.ubuntu_20_04_ami_id_var
+  ami = var.docker_spartan_ami
   instance_type = var.instance_type_t2_micro_var
   key_name = "devops106_ethompson"
   vpc_security_group_ids = [aws_security_group.devops106_terraform_emile_sg_webserver_tf.id]
@@ -280,7 +281,7 @@ resource "aws_instance" "devops106_terraform_emile_webserver_tf" {
 
   associate_public_ip_address = true
 
-  count = 3
+  count = 1
   user_data = data.template_file.app_init.rendered
 
   tags = {
@@ -336,7 +337,7 @@ data "template_file" "app_init" {
 }
 ##########################WEB SERVER LOAD##################
 resource "aws_instance" "devops106_terraform_web2_tf" {
-  ami                    = var.ubuntu_20_04_ami_id_var
+  ami                    = var.docker_spartan_ami
   instance_type          = var.instance_type_t2_micro_var
   key_name               = "devops106_ethompson"
   vpc_security_group_ids = [aws_security_group.devops106_terraform_emile_sg_webserver_tf.id]
@@ -345,7 +346,7 @@ resource "aws_instance" "devops106_terraform_web2_tf" {
 
   associate_public_ip_address = true
 
-  count     = 2
+  count     = 1
   user_data = data.template_file.app_init.rendered
 
   tags = {
@@ -642,4 +643,10 @@ resource "aws_route53_record" "devops106_terraform_emile_dns_proxy_tf" {
   records = [aws_instance.devops106_terraform_emile_proxy_tf.public_ip]
 }
 
-
+resource "aws_route53_record" "devops106_terraform_emile_dns_webservers_tf" {
+  name    = "app"
+  type    = "A"
+  zone_id = aws_route53_zone.devops106_terraform_emile_dns_zone.zone_id
+  ttl = "30"
+  records = aws_instance.devops106_terraform_emile_webserver_tf[*].private_ip
+}
